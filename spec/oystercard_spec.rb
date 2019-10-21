@@ -18,4 +18,30 @@ describe Oystercard do
       expect { subject.top_up(90) }.to raise_error "Maximum balance of #{subject.max_balance} exceeded"
     end
   end
+
+  describe Oystercard.new do
+    it "deducts money when you use it" do
+      expect{ subject.deduct }.to change { subject.balance }.by(-1)
+    end
+  end
+
+  describe Oystercard.new do
+
+    it "knows when the passenger is in transit" do
+      expect(subject.in_journey?).to eq false
+    end
+
+    it "confirms passenger has touched in" do
+      subject.touch_in
+      expect(subject.in_journey?).to eq true
+    end
+
+    it "confirms passenger has touched out" do
+      subject.touch_out
+      expect(subject.in_journey?).to eq false
+    end
+
+  end
+
+
 end
