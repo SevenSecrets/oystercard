@@ -25,13 +25,16 @@ describe Oystercard do
   describe Oystercard.new do
 
     context "deduction tests" do
-      it "deducts money when you use it" do
-        expect{ subject.deduct }.to change { subject.balance }.by(-1)
+
+      it "deducts money when touching out" do
+        expect { subject.touch_out }.to change { subject.balance }.by(-1)
       end
-    end 
+
+    end
   end
 
   describe Oystercard.new do
+    let(:station) { double('station') }
 
     context "travelling tests" do
       it "knows when the passenger is in transit" do
@@ -40,7 +43,7 @@ describe Oystercard do
 
       it "confirms passenger has touched in" do
         subject.top_up(1)
-        subject.touch_in
+        subject.touch_in(station)
         expect(subject.in_journey?).to eq true
       end
 
@@ -52,10 +55,28 @@ describe Oystercard do
   end
 
   describe Oystercard.new do
+    let(:station) { double('station') }
 
     context "insufficient funds tests" do
       it "raises an error if you have insufficient funds" do
-        expect { subject.touch_in }.to raise_error "insufficient funds"
+        expect { subject.touch_in(station) }.to raise_error "insufficient funds"
+      end
+    end
+  end
+
+  describe Oystercard.new do
+    let(:station) { double('station') }
+
+    context "entry stations" do
+      it "card remembers entry station after touch in" do
+        subject.top_up(1)
+        subject.touch_in(station)
+        expect(subject.entry_station).to eq station
+      end
+
+      it "card forgets entry station after touch out" do
+        subject.touch_out
+        expect(subject.entry_station).to eq nil
       end
     end
   end
