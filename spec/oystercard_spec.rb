@@ -1,15 +1,14 @@
 require "oystercard"
 
 describe Oystercard do
-
-  card = Oystercard.new
+  let(:origin) { double(:origin) }
+  let(:destination) { double(:destination) }
 
   it "checks instance of oystercard has a balance" do
-    expect(card.balance).to eq 0
+    expect(subject.balance).to eq 0
   end
 
 
-  describe Oystercard.new do
 
     context "top up tests" do
       it "lets you top up the balance" do
@@ -17,68 +16,68 @@ describe Oystercard do
       end
 
       it "won't let you top up to more than 90" do
-        expect { subject.top_up(90) }.to raise_error "Maximum balance of #{subject.max_balance} exceeded"
+        expect { subject.top_up(91) }.to raise_error "Maximum balance of #{subject.max_balance} exceeded"
       end
     end
-  end
 
-  describe Oystercard.new do
 
     context "deduction tests" do
 
       it "deducts money when touching out" do
-        expect { subject.touch_out }.to change { subject.balance }.by(-1)
+        expect { subject.touch_out(destination) }.to change { subject.balance }.by(-1)
       end
 
     end
-  end
-
-  describe Oystercard.new do
-    let(:station) { double('station') }
 
     context "travelling tests" do
       it "knows when the passenger is in transit" do
-        expect(subject.in_journey?).to eq false
+        expect(subject.in_journey?).to eq nil
       end
 
       it "confirms passenger has touched in" do
         subject.top_up(1)
-        subject.touch_in(station)
+        subject.touch_in(origin)
         expect(subject.in_journey?).to eq true
       end
 
       it "confirms passenger has touched out" do
-        subject.touch_out
-        expect(subject.in_journey?).to eq false
+        subject.touch_out(destination)
+        expect(subject.in_journey?).to eq nil
       end
     end
-  end
 
-  describe Oystercard.new do
-    let(:station) { double('station') }
+
 
     context "insufficient funds tests" do
       it "raises an error if you have insufficient funds" do
-        expect { subject.touch_in(station) }.to raise_error "insufficient funds"
+        expect { subject.touch_in(origin) }.to raise_error "insufficient funds"
       end
     end
-  end
 
-  describe Oystercard.new do
-    let(:station) { double('station') }
+
 
     context "entry stations" do
-      it "card remembers entry station after touch in" do
+        before (:each) do
         subject.top_up(1)
-        subject.touch_in(station)
-        expect(subject.entry_station).to eq station
+        subject.touch_in(origin)
+      end
+      it "card remembers entry station after touch in" do
+        expect(subject.entry_station).to eq origin
       end
 
       it "card forgets entry station after touch out" do
-        subject.touch_out
+        subject.touch_out(destination)
         expect(subject.entry_station).to eq nil
       end
+
+      it "records origin station on touch_out" do
+        subject.touch_out(destination)
+        expect(subject.last_journey).to include(:origin)
+      end
+
+      it "records destination station on touch_out" do
+        subject.touch_out(destination)
+        expect(subject.last_journey).to include(:destination)
     end
   end
-
 end
