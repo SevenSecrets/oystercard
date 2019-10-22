@@ -1,12 +1,15 @@
+require_relative 'station'
+require_relative 'journey'
+
 class Oystercard
 
-  attr_reader :balance, :entry_station, :max_balance, :last_journey
+  attr_reader :balance, :entry_station, :max_balance
   MIN_FARE = 1
 
   def initialize
     @balance = 0
     @max_balance = 90
-    @last_journey = Hash.new
+    @journey = Journey.new(@entry_station)
   end
 
   def top_up(num)
@@ -24,22 +27,16 @@ class Oystercard
   end
 
   def touch_out(destination)
+    @journey.journey_history(destination)
+    fare = @journey.fare(MIN_FARE)
+    deduct(fare)
     @entry_station = nil
-    deduct
-    journey_history(destination)
-  end
-
-  def journey_history(station)
-    @last_journey = {
-      :destination => station,
-      :origin => @entry_station
-    }
   end
 
   private
 
-  def deduct
-    @balance -= 1
+  def deduct(fare)
+    @balance -= fare
   end
 
 end

@@ -23,8 +23,14 @@ describe Oystercard do
 
     context "deduction tests" do
 
-      it "deducts money when touching out" do
+      it "deducts minimum fare when touching out" do
+        subject.top_up(1)
+        subject.touch_in(origin)
         expect { subject.touch_out(destination) }.to change { subject.balance }.by(-1)
+      end
+
+      it "deducts penalty fare when touching out without touching in" do
+        expect { subject.touch_out(destination) }.to change { subject.balance }.by(-6)
       end
 
     end
@@ -41,6 +47,8 @@ describe Oystercard do
       end
 
       it "confirms passenger has touched out" do
+        subject.top_up(1)
+        subject.touch_in(origin)
         subject.touch_out(destination)
         expect(subject.in_journey?).to eq nil
       end
@@ -69,15 +77,5 @@ describe Oystercard do
         subject.touch_out(destination)
         expect(subject.entry_station).to eq nil
       end
-
-      it "records origin station on touch_out" do
-        subject.touch_out(destination)
-        expect(subject.last_journey).to include(:origin)
-      end
-
-      it "records destination station on touch_out" do
-        subject.touch_out(destination)
-        expect(subject.last_journey).to include(:destination)
-    end
   end
 end
